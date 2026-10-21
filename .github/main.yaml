@@ -1,0 +1,71 @@
+name: build, test and Deploy to azure staging
+
+on:  #trigger section
+  push:  #push trigger
+    branches: [ main ]
+  pull_request:  #PR trigger
+    branches: [ main ]
+# JOBs section
+jobs:
+#---------------------------------------------------------
+#STAGE 1: Continous Integration (CI _tests)
+build-and-test: #job name
+ runs-on: ubuntu-latest #runner
+ steps: #steps section
+   - name: Checkout code
+     uses: actions/checkout@v4
+
+   - name: setup Node.js 18
+     uses: action/setup-node@v4
+     with: # action configuration
+       node-version: "18"
+       cache: 'npm'
+
+   - name: install dependancies
+     run: npm ci # exactly same dependency version install karta
+
+   - name: Run Unit  tests
+     run: npm test
+
+#-------------------------------------------------------
+#Stage 2: Continoues Deployment (CD - Azure Staging)
+#-------------------------------------------------------
+deploy-to-staging: #deployment job
+   needs: build-and-test 
+   #condition
+   # push event ho or main branch ho
+   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+   runs-on: ubuntu-latest
+
+   #deployment steps
+   steps:
+     - name: Checkout code
+       uses: action/checkout@v4 # job 1 VM is destroyed
+
+     - name: setup Node.js 18
+       uses: action/setup-node@v4
+       with:
+          node-version: '18'
+     - name: install production dependancies only
+       run: npm ci --only=production
+
+     - name: deploy to azure web app  (staging)
+       uses: azure/webapps-deploy@v3
+       with:
+         app-name: 'app-devops-staging-11485'
+         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_STAGING}}
+         package: .
+      # post health check
+     - name: verify staging web app health
+       run: |
+         echo " Waiting for Azure app service initilization to start (15 sec).."
+         sleep 15
+         STAGING_URL="https://app-devops-staging-11485.azurewebsites.net"
+         HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" $STAGING_URL)
+         echo "Azure Staging HTTP Status Code: $HTTP_STATUS"
+         if [ "$HTTP_STATUS" -eq 200]; then
+            echo " health Check Passed ! Staging Web app is live."
+         else
+            echo " health check failed! Status Code: $HTTP_STATUS"
+            exit 1
+         fi
