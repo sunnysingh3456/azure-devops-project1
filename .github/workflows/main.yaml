@@ -31,13 +31,14 @@ jobs:
    needs: build-and-test 
    #condition
    # push event ho or main branch ho
+   if: github.ref == github.event_name == 'push'
    
    runs-on: ubuntu-latest
 
    #deployment steps
    steps:
      - name: Checkout code
-       uses: action/checkout@v4 # job 1 VM is destroyed
+       uses: actionsif: github.ref == 'refs/heads/main' && github.event_name == 'push'/checkout@v4 # job 1 VM is destroyed
 
      -  name: Setup Node.js 18
         uses: actions/setup-node@v4
