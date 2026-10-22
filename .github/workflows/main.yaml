@@ -13,7 +13,7 @@ jobs:
      uses: actions/checkout@v4
 
    - name: setup Node.js 18
-     uses: action/setup-node@v4
+     uses: actions/setup-node@v4
      with: # action configuration
        node-version: "18"
        cache: 'npm'
@@ -39,9 +39,9 @@ jobs:
      - name: Checkout code
        uses: action/checkout@v4 # job 1 VM is destroyed
 
-     - name: setup Node.js 18
-       uses: actions/setup-node@v4
-       with:
+     -  name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
           node-version: '18'
       
      - name: install production dependancies only
