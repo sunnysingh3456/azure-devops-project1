@@ -31,7 +31,7 @@ jobs:
    needs: build-and-test 
    #condition
    # push event ho or main branch ho
-   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+   
    runs-on: ubuntu-latest
 
    #deployment steps
