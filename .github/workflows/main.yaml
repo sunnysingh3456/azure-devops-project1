@@ -40,9 +40,10 @@ jobs:
        uses: action/checkout@v4 # job 1 VM is destroyed
 
      - name: setup Node.js 18
-       uses: action/setup-node@v4
+       uses: actions/setup-node@v4
        with:
           node-version: '18'
+      
      - name: install production dependancies only
        run: npm ci --only=production
 
