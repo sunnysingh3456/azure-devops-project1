@@ -5,13 +5,10 @@ on:  #trigger section
     branches: [ main ]
   pull_request:  #PR trigger
     branches: [ main ]
-# JOBs section
 jobs:
-#---------------------------------------------------------
-#STAGE 1: Continous Integration (CI _tests)
-build-and-test: #job name
- runs-on: ubuntu-latest #runner
- steps: #steps section
+  build-and-test: #job name
+   runs-on: ubuntu-latest #runner
+   steps: #steps section
    - name: Checkout code
      uses: actions/checkout@v4
 
@@ -30,7 +27,7 @@ build-and-test: #job name
 #-------------------------------------------------------
 #Stage 2: Continoues Deployment (CD - Azure Staging)
 #-------------------------------------------------------
-deploy-to-staging: #deployment job
+  deploy-to-staging: #deployment job
    needs: build-and-test 
    #condition
    # push event ho or main branch ho
