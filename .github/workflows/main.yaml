@@ -7,7 +7,6 @@ on:
     branches: [ main ]
 
 jobs:
-  # STAGE 1: Continuous Integration (Tests)
   build-and-test:
     runs-on: ubuntu-latest
     steps:
@@ -26,10 +25,8 @@ jobs:
       - name: Run Unit tests
         run: npm test
 
-  # STAGE 2: Continuous Deployment (Azure Staging)
   deploy-to-staging:
     needs: build-and-test
-    # Condition: Runs ONLY when code is pushed/merged to the main branch
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
@@ -54,14 +51,14 @@ jobs:
 
       - name: verify staging web app health
         run: |
-          echo "Waiting for Azure app service initialization to start ..."
+          echo "Waiting 25 seconds for Azure App Service to start..."
           sleep 25
 
           STAGING_URL="https://app-devops-staging-11485.azurewebsites.net"
-          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" $STAGING_URL)
+          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$STAGING_URL")
           echo "Azure Staging HTTP Status Code: $HTTP_STATUS"
           if [ "$HTTP_STATUS" -eq 200 ]; then
-            echo "Health Check Passed! Staging Web app is live."
+            echo "Health Check Passed! Staging Web app live hai."
           else
             echo "Health check failed! Status Code: $HTTP_STATUS"
             exit 1
