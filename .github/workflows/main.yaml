@@ -54,8 +54,9 @@ jobs:
 
       - name: verify staging web app health
         run: |
-          echo "Waiting for Azure app service initialization to start (15 sec)..."
-          sleep 15
+          echo "Waiting for Azure app service initialization to start ..."
+          sleep 25
+
           STAGING_URL="https://app-devops-staging-11485.azurewebsites.net"
           HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" $STAGING_URL)
           echo "Azure Staging HTTP Status Code: $HTTP_STATUS"
