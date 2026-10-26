@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const PORT = Process.env.PORT || 8080;
+const PORT = process.env.PORT || 8080;
 //health check endpoint
 app.get('/', (req, res) => {
     res.status(200).json({ 
