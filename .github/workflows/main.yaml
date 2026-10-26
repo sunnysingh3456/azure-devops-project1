@@ -1,4 +1,4 @@
-name: build, test and Deploy to azure staging
+name: build, test and deploy to Azure staging
 
 on:
   push:
@@ -9,20 +9,21 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: setup Node.js 18
+      - name: Setup Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: "18"
-          cache: 'npm'
+          cache: "npm"
 
-      - name: install dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: Run Unit tests
+      - name: Run unit tests
         run: npm test
 
   deploy-to-staging:
@@ -37,28 +38,30 @@ jobs:
       - name: Setup Node.js 18
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
-      - name: install production dependencies only
-        run: npm ci --only=production
+      - name: Install production dependencies
+        run: npm ci --omit=dev
 
-      - name: deploy to azure web app (staging)
+      - name: Deploy to Azure Web App (staging)
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'app-devops-staging-11485'
+          app-name: "app-devops-staging-11485"
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_STAGING }}
           package: .
 
-      - name: verify staging web app health
+      - name: Verify staging web app health
         run: |
           echo "Waiting 25 seconds for Azure App Service to start..."
           sleep 25
 
           STAGING_URL="https://app-devops-staging-11485.azurewebsites.net"
-          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$STAGING_URL")
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$STAGING_URL")
+
           echo "Azure Staging HTTP Status Code: $HTTP_STATUS"
-          if [ "$HTTP_STATUS" -eq 200 ]; then
-            echo "Health Check Passed! Staging Web app live hai."
+
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "Health Check Passed! Staging Web app is live."
           else
             echo "Health check failed! Status Code: $HTTP_STATUS"
             exit 1
