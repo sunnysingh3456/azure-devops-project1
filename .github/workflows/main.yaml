@@ -66,3 +66,45 @@ jobs:
             echo "Health check failed! Status Code: $HTTP_STATUS"
             exit 1
           fi
+  
+  deploy-to-production:
+    needs: deploy-to-staging
+    runs-on: ubuntu-latest  
+    environment: Production
+
+    steps:
+    - name: Checkoutcode
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js 18
+      uses: actions:/setup-node@18
+      with:
+        node-version: '18'
+
+    - name: install production dependencies only
+      run: npm ci -- only=production
+
+    - name: deploy to azure web app (prodduction)
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: 'app-devops-prod-11485'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_PROD }}
+        package: .
+
+    - name: verify production web app health
+      run: |
+       echo "Waiting 25 seconds for Production App Service to start..."
+       sleep 25
+
+       PROD_URL="https://app-devops-prod-11485.azurewebsites.net"
+       
+       HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$PROD_URL")
+       echo "Azure Production HTTP Status Code: $HTTP_STATUS"
+       if ["$HTTP_STATUS" -eq 200 ]; then
+       echo "Health Check Passed! Production web app is live ."
+       else
+       echo "Health Check Failed! Status Code: $HTTP_STATUS"
+       exit 1
+       fi
+       
+
